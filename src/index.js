@@ -1,4 +1,4 @@
-const seedDatabase = require('./scripts/seedDatabase'); 
+const seedDatabase = require('../scripts/seedDatabase'); 
 const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
