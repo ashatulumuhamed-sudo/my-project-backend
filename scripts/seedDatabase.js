@@ -4,12 +4,10 @@ require('dotenv').config()
 const PortfolioItem = require('../src/models/Portfolio')
 const Testimonial = require('../src/models/Testimonial')
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/website-order-service'
-
 const portfolioData = [
   {
     title: 'Лендинг',
-    description: 'Одностраничный сайт для продвижения продукта или услуги',
+    description: 'Одностраничный site для продвижения продукта или услуги',
     price: 15000,
     image: '📄',
     features: ['SEO оптимизация', 'Мобильная версия', 'Форма заказа']
@@ -23,14 +21,14 @@ const portfolioData = [
   },
   {
     title: 'Портфолио',
-    description: 'Персональный сайт для демонстрации работ и проектов',
+    description: 'Персональный site для демонстрации работ и проектов',
     price: 25000,
     image: '🎨',
     features: ['Галерея работ', 'Резюме', 'Контакты']
   },
   {
     title: 'Корпоративный сайт',
-    description: 'Профессиональный сайт компании с информацией о услугах',
+    description: 'Профессиональный site компании с информацией о услугах',
     price: 75000,
     image: '🏢',
     features: ['О компании', 'Услуги', 'Контакты', 'Блог']
@@ -100,32 +98,35 @@ const testimonialData = [
 
 async function seedDatabase() {
   try {
-    await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
+    // Используем уже открытое сервером подключение или подключаемся заново
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect('mongodb+srv://ashatulumuhamed_db_user:Muhaha96@dbadmin.8tczbuw.mongodb.net/production?appName=dbadmin', {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      });
+    }
 
-    console.log('✅ Connected to MongoDB')
+    console.log('✅ Connected to MongoDB for seeding')
 
-    // Clear existing data
+    // Очищаем старые данные
     await PortfolioItem.deleteMany({})
     await Testimonial.deleteMany({})
     console.log('🗑️ Cleared existing data')
 
-    // Insert portfolio items
+    // Записываем новые данные
     await PortfolioItem.insertMany(portfolioData)
     console.log(`✅ Inserted ${portfolioData.length} portfolio items`)
 
-    // Insert testimonials
     await Testimonial.insertMany(testimonialData)
     console.log(`✅ Inserted ${testimonialData.length} testimonials`)
 
     console.log('🎉 Database seeded successfully!')
-    process.exit(0)
+    return true; // Возвращаем успех без убийства сервера
   } catch (error) {
     console.error('❌ Error seeding database:', error)
-    process.exit(1)
+    throw error;
   }
 }
 
-seedDatabase()
+// Экспортируем функцию наружу для нашего роута
+module.exports = seedDatabase;

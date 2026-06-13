@@ -1,3 +1,4 @@
+const seedDatabase = require('./scripts/seedDatabase'); 
 const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
@@ -29,6 +30,23 @@ mongoose.connect(MONGODB_URI, {
 app.use('/api/orders', orderRoutes)
 app.use('/api/portfolio', portfolioRoutes)
 app.use('/api/testimonials', testimonialRoutes)
+
+// Секретный роут для удаленного наполнения базы данных через браузер
+app.get('/api/run-my-seed-now', async (req, res) => {
+  try {
+    // Вызываем функцию сидинга, экспортированную из seedDatabase.js
+    if (typeof seedDatabase === 'function') {
+      await seedDatabase();
+    } else if (seedDatabase && typeof seedDatabase.seedDatabase === 'function') {
+      await seedDatabase.seedDatabase();
+    } else {
+      throw new Error('Функция seedDatabase не найдена в модуле');
+    }
+    res.send('🎉 База данных успешно заполнена через сервер Render!');
+  } catch (err) {
+    res.status(500).send('❌ Ошибка при сидинге через сервер: ' + err.message);
+  }
+})
 
 // Health check
 app.get('/api/health', (req, res) => {
